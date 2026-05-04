@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}慧眼鉴真 · SeerBench{% endblock %}
+
+{% block content %}
+<div>
+
+  <!-- Hero — mirrors the live tool at seerbench.com -->
+  <section class="max-w-5xl mx-auto px-6 pt-32 pb-24 text-center">
+    <div class="hero-lead mb-8 fade-in">SeerBench · 模型能力鉴真</div>
+    <h1 class="serif hero-display fade-in" style="color: var(--text-primary);">
+      模型能力评测<span class="cursor-blink"></span>
+    </h1>
+    <p class="hero-sub mx-auto mt-8 fade-in-delay-1">
+      6 类基准打分（数学 / 推理 / 语言 / 指令 / 数据 / 代码），跑分与公开评分对齐，每月更新，明确模型能力档位。
+    </p>
+
+    <!-- Static preview of the live test form. The fields are display-only;
+         the CTA hands off to the real tool at {{ tool_cta_url }}. -->
+    <div class="mt-12 max-w-lg mx-auto card p-7 fade-in-delay-2 text-left">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm mb-1.5" style="color: var(--text-secondary);">API Base URL</label>
+          <div class="input mono" style="color: var(--text-muted);">https://your-proxy.example.com</div>
+        </div>
+        <div>
+          <label class="block text-sm mb-1.5" style="color: var(--text-secondary);">API Key</label>
+          <div class="input mono" style="color: var(--text-muted);">sk-•••••••••••••••</div>
+        </div>
+        <div>
+          <label class="block text-sm mb-1.5" style="color: var(--text-secondary);">模型名称</label>
+          <div class="input mono" style="color: var(--text-muted);">claude-opus-4-7</div>
+          <p class="text-xs mt-1" style="color: var(--text-muted);">中转站可能使用不同的模型名称，请按供应商要求填写</p>
+        </div>
+        <div>
+          <label class="block text-sm mb-1.5" style="color: var(--text-secondary);">测试项目</label>
+          <div class="grid grid-cols-2 gap-2">
+            {% set probe_options = ['数学', '推理', '语言', '指令遵循', '数据分析', '代码'] %}
+            {% for label in probe_options %}
+            <div class="flex items-center gap-2 px-3 py-2 rounded-md border select-none"
+                 style="border-color: var(--accent); background: var(--accent-soft);">
+              <span class="w-3.5 h-3.5 rounded inline-grid place-items-center" style="background: var(--accent); color: #fff;">
+                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              </span>
+              <span class="text-sm" style="color: var(--text-primary);">{{ label }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          <p class="text-xs mt-1.5" style="color: var(--text-muted);">默认勾选 6 项 SeerBench 公开能力题集</p>
+        </div>
+        <a href="{{ tool_cta_url }}" class="btn btn-primary w-full justify-center mt-2">
+          去 seerbench.com 鉴真
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5" aria-hidden="true">
+            <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+      </div>
+      <p class="text-xs mt-5 text-center" style="color: var(--text-muted);">
+        API Key 仅用于本次测试，仅保存于本地浏览器。建议使用小额账户或测后即删。测试约需 2-5 分钟。
+      </p>
+    </div>
+
+    <div class="flex items-center justify-center gap-2 mt-6 fade-in-delay-3">
+      <span class="badge badge-mute">NO SIGNUP</span>
+      <span class="badge badge-mute">BRING YOUR OWN KEY</span>
+      <span class="badge badge-mute">REPORTS ARE PUBLIC</span>
+    </div>
+  </section>
+
+  <!-- Probes Overview — mirrors the live tool -->
+  <section class="max-w-6xl mx-auto px-6 py-24">
+    <div class="section-head">
+      <div class="eyebrow">方法论</div>
+      <h2 class="serif section-title" style="color: var(--text-primary);">能力维度判别 + 行为信号交叉验证</h2>
+      <p class="section-lead">6 维公开能力题集抽题跑分 → 6 档 Bayesian 后验；行为信号作辅助。<a href="methodology.html" class="link">完整方法论 &rarr;</a></p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% set probes = [
+        ('数学',     '数学竞赛 / 奥赛 / 本科高难度题；月度轮换抗污染'),
+        ('推理',     '多步逻辑、心理状态追踪、空间几何；区分模型实际能力'),
+        ('语言',     '语义关联、文段重排、拼写纠错'),
+        ('指令遵循', '每题多条强约束；pure-python verifier 自动判定'),
+        ('数据分析', '表格合并 / 重排 / 列类型标注'),
+        ('代码',     '竞赛编程平台真题；Docker 沙箱运行 + 用例测试评估'),
+      ] %}
+      {% for name, desc in probes %}
+      <div class="card p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium" style="color: var(--text-primary);">{{ name }}</span>
+        </div>
+        <p class="text-xs" style="color: var(--text-muted);">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-10">
+      <a href="methodology.html" class="btn btn-ghost">了解完整方法论 &rarr;</a>
+    </div>
+  </section>
+
+  <!-- Evaluation system: capability ruler + claim match -->
+  <section class="max-w-4xl mx-auto px-6 py-24">
+    <div class="section-head">
+      <div class="eyebrow">评分体系</div>
+      <h2 class="serif section-title" style="color: var(--text-primary);">能力档位 × 声明匹配</h2>
+      <p class="text-sm mt-3" style="color: var(--text-secondary); line-height: 1.7;">
+        评测分两个独立维度：先把端点放上 <strong>能力刻度尺</strong> 看实测档位，再用 <strong>声明匹配概率</strong> 判断它是不是端点声称的那个模型。
+      </p>
+    </div>
+
+    <!-- Capability Ruler: 4 tiers anchored to SeerBench public leaderboard -->
+    <div class="mb-12">
+      <div class="flex items-baseline justify-between mb-4">
+        <h3 class="serif font-medium" style="color: var(--text-primary); font-size: 17px;">能力档位（4 档刻度尺）</h3>
+        <span class="text-xs mono" style="color: var(--text-muted);">轴 = 6 类能力准确率均值</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex items-center gap-4">
+          <div class="w-44 text-right font-medium" style="color: var(--success);">
+            <span class="text-[15px]">旗舰</span>
+            <span class="mono text-[10px] ml-1" style="color: var(--text-muted);">TIER_FLAG</span>
+          </div>
+          <div class="flex-1 h-8 rounded-md overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);"><div class="h-full score-bar rounded-md" style="width:100%; background: var(--success-soft);"></div></div>
+          <div class="w-16 text-xs mono" style="color: var(--text-muted);">&ge; 0.795</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="w-44 text-right font-medium" style="color: var(--success);">
+            <span class="text-[15px]">主流</span>
+            <span class="mono text-[10px] ml-1" style="color: var(--text-muted);">TIER_MAIN</span>
+          </div>
+          <div class="flex-1 h-8 rounded-md overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);"><div class="h-full score-bar rounded-md" style="width:78%; background: var(--success-soft); opacity: 0.7;"></div></div>
+          <div class="w-16 text-xs mono" style="color: var(--text-muted);">&ge; 0.740</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="w-44 text-right font-medium" style="color: var(--text-secondary);">
+            <span class="text-[15px]">基础</span>
+            <span class="mono text-[10px] ml-1" style="color: var(--text-muted);">TIER_BASE</span>
+          </div>
+          <div class="flex-1 h-8 rounded-md overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);"><div class="h-full score-bar rounded-md" style="width:62%; background: var(--bg-muted);"></div></div>
+          <div class="w-16 text-xs mono" style="color: var(--text-muted);">&ge; 0.650</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="w-44 text-right font-medium" style="color: var(--danger);">
+            <span class="text-[15px]">入门</span>
+            <span class="mono text-[10px] ml-1" style="color: var(--text-muted);">TIER_ENTRY</span>
+          </div>
+          <div class="flex-1 h-8 rounded-md overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);"><div class="h-full score-bar rounded-md" style="width:35%; background: var(--danger-soft);"></div></div>
+          <div class="w-16 text-xs mono" style="color: var(--text-muted);">&lt; 0.650</div>
+        </div>
+      </div>
+      <p class="text-xs mt-4 leading-relaxed" style="color: var(--text-muted);">
+        档位锚定在公开 leaderboard 数据：旗舰 = GPT-5.5 / Opus 4.7；主流 = Opus 4.6 / Sonnet 4.6；基础 = Sonnet 4.5 / MiniMax M2.7；入门 = Haiku 4.5 及以下。
+      </p>
+    </div>
+
+    <!-- Claim Match: Bayesian posterior over 6 Claude tiers -->
+    <div>
+      <div class="flex items-baseline justify-between mb-4">
+        <h3 class="serif font-medium" style="color: var(--text-primary); font-size: 17px;">声明匹配（Claim Match Probability）</h3>
+        <span class="text-xs mono" style="color: var(--text-muted);">Bayesian 后验 P(声明模型 | 观测)</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex items-center gap-4">
+          <div class="w-44 text-right font-medium" style="color: var(--success);">
+            <span class="text-[15px]">一致</span>
+            <span class="mono text-[10px] ml-1" style="color: var(--text-muted);">match</span>
+          </div>
+          <div class="flex-1 h-8 rounded-md overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);"><div class="h-full score-bar rounded-md" style="width:90%; background: var(--success-soft);"></div></div>
+          <div class="w-16 text-xs mono" style="color: var(--text-muted);">P &ge; 0.50</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="w-44 text-right font-medium" style="color: var(--warning);">
+            <span class="text-[15px]">存疑</span>
+            <span class="mono text-[10px] ml-1" style="color: var(--text-muted);">suspicious</span>
+          </div>
+          <div class="flex-1 h-8 rounded-md overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);"><div class="h-full score-bar rounded-md" style="width:55%; background: var(--warning-soft);"></div></div>
+          <div class="w-16 text-xs mono" style="color: var(--text-muted);">&ge; 0.15</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="w-44 text-right font-medium" style="color: var(--danger);">
+            <span class="text-[15px]">偏离</span>
+            <span class="mono text-[10px] ml-1" style="color: var(--text-muted);">mismatch</span>
+          </div>
+          <div class="flex-1 h-8 rounded-md overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);"><div class="h-full score-bar rounded-md" style="width:20%; background: var(--danger-soft);"></div></div>
+          <div class="w-16 text-xs mono" style="color: var(--text-muted);">&lt; 0.15</div>
+        </div>
+      </div>
+      <p class="text-xs mt-4 leading-relaxed" style="color: var(--text-muted);">
+        每类能力题目的正确率作 Bernoulli 似然，对 6 个 Claude 档位（Opus 4.7 / Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Haiku 4.5 / 低于 Haiku）做 softmax 后验，再读出端点声称那一档的概率。<strong>"偏离" 即强证据指向降级</strong>，等价于旧的 <span class="mono">DEFINITE_DOWNGRADE</span>。
+      </p>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="max-w-3xl mx-auto px-6 py-24 text-center">
+    <h2 class="serif" style="color: var(--text-primary); font-size: clamp(32px, 5vw, 48px); line-height: 1.15; letter-spacing: -0.02em;">
+      跑一次，把"好像变笨了"换成一份报告。
+    </h2>
+    <div class="flex flex-wrap items-center justify-center gap-3 mt-10">
+      <a href="{{ tool_cta_url }}" class="btn btn-primary">
+        去 seerbench.com 鉴真
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+      <a href="methodology.html" class="btn btn-secondary">先看方法论</a>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

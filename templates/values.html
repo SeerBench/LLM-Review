@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}价值观{% endblock %}
+{% block description %}慧眼鉴真价值观：我们做什么、为什么不收"认证费"、我们如何抵抗对抗保持评测真实。{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-24">
+
+  <!-- Hero -->
+  <div class="text-center mb-16 fade-in">
+    <div class="hero-lead mb-6">our values · 价值观</div>
+    <h1 class="serif text-ink" style="font-size: clamp(40px, 5.5vw, 64px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 500;">创造价值，绝不作恶<span class="cursor-blink"></span></h1>
+    <p class="mt-6 mx-auto" style="color: var(--text-secondary); font-size: 18px; line-height: 1.6; max-width: 520px;">
+        我们相信，创造价值，会产生回馈。
+    </p>
+    <p class="mx-auto" style="color: var(--text-secondary); font-size: 16px; line-height: 1.6; max-width: 520px;">
+      关于我们做什么、为什么这么做，以及背后的取舍。</p>
+  </div>
+
+
+  <!--  always expanded -->
+  <section class="mb-16 fade-in-delay-2">
+    <div class="bg-surface rounded-2xl border border-edge p-6 sm:p-10 card">
+
+      <!-- 1. 我们做什么 · 怎么创造价值 -->
+      <div class="mb-8">
+        <h3 class="text-ink font-medium mb-3" style="font-size: 28px; line-height: 1.25; font-weight: 500; letter-spacing: -0.015em;">我们做什么</h3>
+        <p class="text-sm text-body leading-relaxed mb-3">
+          中转站是目前现实条件下，很多人使用国际一线AI模型的一个可行方式。慧眼鉴真提供模型能力的鉴定工具：你交一个第三方中转站，我们用一组<span class="text-ink">持续更新的题库</span>（数学 / 推理 / 语言 / 指令遵循 / 数据分析 / 代码）实测它的能力档位，对照直连官方 API 的基准平分给出评测报告。
+        </p>
+        <p class="text-sm text-body leading-relaxed">
+          持续跟进测试方法、定期轮换题集、避免中转站针对性对抗，帮助用户了解他们买到的中转模型的实际能力档位 —— <span class="text-ink">数据真实可靠</span>是我们最核心的价值所在。
+        </p>
+      </div>
+
+      <!-- 2. 我们承诺不做的事 -->
+      <div class="mb-8">
+        <h3 class="text-ink font-medium mb-3" style="font-size: 28px; line-height: 1.25; font-weight: 500; letter-spacing: -0.015em;">我们承诺不做的事</h3>
+        <ul class="space-y-3 text-sm text-body leading-relaxed">
+          <li class="flex gap-3">
+            <span class="text-accent shrink-0 mt-0.5" aria-hidden="true">✗</span>
+            <span><strong class="text-ink">永远不收「认证费」</strong>。有API 中转站主动付费贴「已验证」标签 —— 我们不接这种生意。一旦评测结果可以被钱影响，整个产品的价值即被破坏。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-accent shrink-0 mt-0.5" aria-hidden="true">✗</span>
+            <span><strong class="text-ink">没有任何「白名单加分」</strong>。如设置广告位，会清晰标明。承诺广告商与所有匿名提交的测试站点<span class="text-ink">测试方法完全一致</span>。</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 3. 我们如何抵抗对抗 -->
+      <div class="mb-8">
+        <h3 class="text-ink font-medium mb-3" style="font-size: 28px; line-height: 1.25; font-weight: 500; letter-spacing: -0.015em;">我们如何避免针对性对抗刷分</h3>
+        <p class="text-sm text-body leading-relaxed mb-4">
+          被测站点有动机识别我们的流量、然后专门用更高档位的模型回应——这会让评测变成「刷分」。我们一直与这样的技术性手段长期对抗，以下是部分已经实施的措施：
+        </p>
+        <ul class="space-y-3 text-sm text-body leading-relaxed">
+          <li class="flex gap-3">
+            <span class="text-faded shrink-0 mt-0.5" aria-hidden="true">•</span>
+            <span><strong class="text-ink">随机题库</strong>——每次从题库随机抽取试题，月度轮换/补充。中转站要长期靠记题、预先训练或缓存答案来作弊，需要付出更高的成本。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-faded shrink-0 mt-0.5" aria-hidden="true">•</span>
+            <span><strong class="text-ink">付费代理 IP 保护服务器身份</strong>——我们采购了付费的住宅代理出口IP。这是真金白银的额外成本，但能确保被测的中转站<span class="text-ink">无法识别来源 IP</span>，避免基于来源地址，专门提供高阶模型刷分。</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-faded shrink-0 mt-0.5" aria-hidden="true">•</span>
+            <span><strong class="text-ink">不公开披露探针的可对抗细节</strong>——具体题源仓库、子分类标签、评分阈值我们刻意不外宣。对正常使用者意义不大，但披露后中转站对抗的成本立刻降低。（因此慧眼鉴真项目无法开源，如担心 API 密钥安全性，建议使用小额密钥或测后即删。）</span>
+          </li>
+        </ul>
+
+        <p class="text-sm text-body leading-relaxed mt-3">
+          我们选择了更高的研发和运维成本：服务端跑探针、定期更新公开题集、付费代理出口。这些是我们对「数据真实可靠」这件事<span class="text-ink">买单的方式</span>。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Future questions placeholder -->
+  <section class="mb-16 fade-in-delay-3 text-center">
+    <p class="text-sm text-faded leading-relaxed">
+      更多问题陆续补充。如果你有想问的——
+      <a href="https://github.com/SeerBench/LLM-Review/issues" target="_blank" class="text-accent hover:text-[var(--accent-hover)]">欢迎在 GitHub 提 issue</a>。
+    </p>
+  </section>
+
+  <!-- CTA -->
+  <div class="text-center fade-in-delay-3">
+    <a href="{{ tool_cta_url }}" class="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-6 py-3 rounded-xl transition">
+      去 SeerBench，立即验证你的 API 端点 &rarr;
+    </a>
+  </div>
+</div>
+{% endblock %}

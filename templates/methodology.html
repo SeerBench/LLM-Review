@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% block title %}方法论{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-24">
+
+  <!-- Hero -->
+  <div class="text-center mb-20 fade-in">
+    <div class="hero-lead mb-6">Methodology · 方法论</div>
+    <h1 class="serif text-ink" style="font-size: clamp(40px, 5.5vw, 64px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 500;">测试方法论<span class="cursor-blink"></span></h1>
+    <p class="hero-sub mx-auto mt-6" style="font-size: 18px;">6 项能力探测的技术细节和评分体系的数学原理</p>
+  </div>
+
+  <!-- Design Principles -->
+  <section class="mb-20 fade-in">
+    <h2 class="serif section-title mb-8 text-ink">设计原则</h2>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="bg-surface rounded-2xl border border-edge p-5 card">
+        <h3 class="text-ink font-medium mb-2">只测能力，不测可伪造信号</h3>
+        <p class="text-sm text-body"><b>实际能力不可伪造。</b>回答风格、自报身份、拒答模式都有可能被代理在系统中伪造出来。因此我们弃用所有可被表面模仿的行为指纹，只考核模型解决客观实际问题的能力。</p>
+      </div>
+      <div class="bg-surface rounded-2xl border border-edge p-5 card">
+        <h3 class="text-ink font-medium mb-2">与官方直连 API 评测对照</h3>
+        <p class="text-sm text-body">6 大类能力测试，使用完整版几百项测试题库，通过官方直连 API 评测。评测成绩构成对各主流模型的基线成绩。以此作为对比，直观看到送测模型的能力档位。</p>
+      </div>
+      <div class="bg-surface rounded-2xl border border-edge p-5 card">
+        <h3 class="text-ink font-medium mb-2">确定性自动评分</h3>
+        <p class="text-sm text-body">经过几轮改进，我们放弃了"模糊指标 + 人工对照打分"的模糊评测方式。每道题都有客观答案：解析数学等价、Python Verifier 验每条强约束、模型提供代码直接在 Docker 沙箱跑测试用例。评分标准确定、可复核，不依赖模糊的人工主观评判或者 LLM 当裁判。</p>
+      </div>
+      <div class="bg-surface rounded-2xl border border-edge p-5 card">
+        <h3 class="text-ink font-medium mb-2">优雅降级</h3>
+        <p class="text-sm text-body">任何一类探针失败——Docker 不可用、模型超时、超过一半样本未完成——都会被自动从档位后验里剔除而不污染其他维度，置信度对应下调，报告页明确标注被剔除的类别。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 SeerBench Probes (v1 main path) -->
+  <section class="mb-20 fade-in" x-data="{ open: null }">
+    <h2 class="serif section-title mb-8 text-ink">6 项能力探测</h2>
+    <p class="text-sm text-body leading-relaxed mb-6">
+      以下 6 项探针抽题自<span class="text-ink">月度轮换以抗污染</span>的公开能力题集，每题都有确定性评分器（数学解析、语义匹配、规则验证、沙箱测试用例等）。
+      每类默认抽 10 题，与公开 leaderboard 同口径采样；下方每张卡片附「公开模型基线」让你直观看到不同档位的预期分数区间。
+      为避免针对性对抗，我们不对外披露具体题源仓库与子分类标签。
+    </p>
+    <div class="space-y-3">
+
+      <!-- 数学 -->
+      <div class="bg-surface rounded-2xl border border-edge overflow-hidden card">
+        <button @click="open = open === 'lb_math' ? null : 'lb_math'" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition">
+          <div class="flex items-center gap-3">
+            <span class="text-ink font-medium">数学</span>
+          </div>
+          <svg class="w-4 h-4 text-faded transition-transform" :class="open === 'lb_math' && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div x-show="open === 'lb_math'" x-transition class="px-5 pb-5 text-sm text-body space-y-3 border-t border-edge/50 pt-4">
+          <p><strong class="text-body">题源：</strong>数学竞赛、奥赛、本科高难度题，月度轮换以抗污染。</p>
+          <p><strong class="text-body">评分：</strong>用上游确定性评分器对照客观结果自动判分（兼容 <code>\boxed{}</code> 与裸答案）。</p>
+          <p class="text-xs text-faded font-mono pt-1">公开模型基线 · 入门 0.78 · 基础 0.79 · 主流 0.87–0.89 · 旗舰 0.93</p>
+        </div>
+      </div>
+
+      <!-- 推理 -->
+      <div class="bg-surface rounded-2xl border border-edge overflow-hidden card">
+        <button @click="open = open === 'lb_reasoning' ? null : 'lb_reasoning'" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition">
+          <div class="flex items-center gap-3">
+            <span class="text-ink font-medium">推理</span>
+          </div>
+          <svg class="w-4 h-4 text-faded transition-transform" :class="open === 'lb_reasoning' && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div x-show="open === 'lb_reasoning'" x-transition class="px-5 pb-5 text-sm text-body space-y-3 border-t border-edge/50 pt-4">
+          <p><strong class="text-body">题源：</strong>多步逻辑推理、心理状态追踪、撒谎判断、空间几何类抽题。</p>
+          <p><strong class="text-body">为什么重要：</strong>需要多步推理或追踪人物状态，区分模型能力最直接的维度之一 —— 模型容量瓶颈直接体现在这。</p>
+          <p class="text-xs text-faded font-mono pt-1">公开模型基线 · 入门 0.62 · 基础 0.78 · 主流 0.86–0.89 · 旗舰 0.88</p>
+        </div>
+      </div>
+
+      <!-- 语言 -->
+      <div class="bg-surface rounded-2xl border border-edge overflow-hidden card">
+        <button @click="open = open === 'lb_lang' ? null : 'lb_lang'" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition">
+          <div class="flex items-center gap-3">
+            <span class="text-ink font-medium">语言</span>
+          </div>
+          <svg class="w-4 h-4 text-faded transition-transform" :class="open === 'lb_lang' && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div x-show="open === 'lb_lang'" x-transition class="px-5 pb-5 text-sm text-body space-y-3 border-t border-edge/50 pt-4">
+          <p><strong class="text-body">题源：</strong>语义关联、文段重排、拼写纠错类抽题。</p>
+          <p><strong class="text-body">考察：</strong>语义匹配、文本重排与拼写恢复。Claude 4.x 整体偏强，差距相对小但仍可分辨档位。</p>
+          <p class="text-xs text-faded font-mono pt-1">公开模型基线 · 入门 0.66 · 基础 0.76 · 主流 0.78–0.83 · 旗舰 0.78</p>
+        </div>
+      </div>
+
+      <!-- 指令遵循 -->
+      <div class="bg-surface rounded-2xl border border-edge overflow-hidden card">
+        <button @click="open = open === 'lb_if' ? null : 'lb_if'" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition">
+          <div class="flex items-center gap-3">
+            <span class="text-ink font-medium">指令遵循</span>
+          </div>
+          <svg class="w-4 h-4 text-faded transition-transform" :class="open === 'lb_if' && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div x-show="open === 'lb_if'" x-transition class="px-5 pb-5 text-sm text-body space-y-3 border-t border-edge/50 pt-4">
+          <p><strong class="text-body">题源：</strong>每题带多条强约束（字数、段落首字、特定标记位等）的写作任务。</p>
+          <p><strong class="text-body">评分：</strong>纯 Python Verifier 自动判定每条约束是否被遵循；分数为 (整体通过 + 部分通过率) / 2。</p>
+          <p class="text-xs text-faded font-mono pt-1">公开模型基线 · 入门 0.50 · 基础 0.53 · 主流 0.63–0.64 · 旗舰 0.59</p>
+        </div>
+      </div>
+
+      <!-- 数据分析 -->
+      <div class="bg-surface rounded-2xl border border-edge overflow-hidden card">
+        <button @click="open = open === 'lb_data' ? null : 'lb_data'" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition">
+          <div class="flex items-center gap-3">
+            <span class="text-ink font-medium">数据分析</span>
+          </div>
+          <svg class="w-4 h-4 text-faded transition-transform" :class="open === 'lb_data' && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div x-show="open === 'lb_data'" x-transition class="px-5 pb-5 text-sm text-body space-y-3 border-t border-edge/50 pt-4">
+          <p><strong class="text-body">题源：</strong>表格合并、表格重排、列类型标注类抽题。</p>
+          <p><strong class="text-body">考察：</strong>从结构化数据中提取 / 重组信息的能力。Opus 与 Sonnet 在这里有清晰差距。</p>
+          <p class="text-xs text-faded font-mono pt-1">公开模型基线 · 入门 0.59 · 基础 0.57 · 主流 0.70–0.76 · 旗舰 0.78</p>
+        </div>
+      </div>
+
+      <!-- 代码 -->
+      <div class="bg-surface rounded-2xl border border-edge overflow-hidden card">
+        <button @click="open = open === 'lcb' ? null : 'lcb'" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-muted transition">
+          <div class="flex items-center gap-3">
+            <span class="text-ink font-medium">代码</span>
+          </div>
+          <svg class="w-4 h-4 text-faded transition-transform" :class="open === 'lcb' && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <div x-show="open === 'lcb'" x-transition class="px-5 pb-5 text-sm text-body space-y-3 border-t border-edge/50 pt-4">
+          <p><strong class="text-body">题源：</strong>竞赛编程平台真题，持续更新以对抗污染。</p>
+          <p><strong class="text-body">评分：</strong>生成的代码进入 Docker 沙箱跑程序测试用例。测试结果直接反映模型能力</p>
+          <p class="text-xs text-faded font-mono pt-1">公开模型基线 · 入门 0.73 · 基础 0.80 · 主流 0.78–0.80 · 旗舰 0.82</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Paid · expanded checks -->
+  <section class="mb-20 fade-in">
+    <h2 class="serif section-title mb-8 text-ink">付费版 · 更完整的检测</h2>
+    <p class="text-sm text-body leading-relaxed mb-6">
+      付费版将在两条线上同时扩展，做"完整规模能力评测 + 多维度行为佐证"的复合判定。
+    </p>
+
+    <div class="bg-surface rounded-2xl border border-edge p-5 card mb-4">
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-xs font-mono text-faded">A</span>
+        <h3 class="text-ink font-medium">完整规模能力评测</h3>
+      </div>
+      <p class="text-sm text-body leading-relaxed">
+        免费版每类抽 10 题（σ ≈ 16pt），对相邻档位判别力有限。付费版按公开榜单同口径完整跑数百题，单次测试就能锁定能力档位，消除小样本带来的方差和噪声。
+      </p>
+    </div>
+
+    <div class="bg-surface rounded-2xl border border-edge p-5 card">
+      <div class="flex items-baseline gap-2 mb-2">
+        <span class="text-xs font-mono text-faded">B</span>
+        <h3 class="text-ink font-medium">多维度探针套件（13 项）</h3>
+      </div>
+      <p class="text-sm text-body leading-relaxed mb-4">
+        行为指纹单独使用易被代理 mock，因此从主路径剔除；但作为辅助佐证、与能力分数交叉对比仍有价值。每项一句话原理：
+      </p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-edge/60">
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">复杂推理</td><td class="px-3 py-2 text-body">5 道精心设计的多步推理题，每题都有自动验证器；最难伪造的能力维度。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">魔术拒答</td><td class="px-3 py-2 text-body">某些模型训练时嵌入的特定字符串触发拒答，非本家模型不会触发。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">大海捞针</td><td class="px-3 py-2 text-body">在 200K / 500K / 1M 长文本中插入随机验证码，测长上下文检索能力。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">混淆抗性</td><td class="px-3 py-2 text-body">用零宽字符等手段包装请求，测模型是否会被绕过或扰乱。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">内容门控</td><td class="px-3 py-2 text-body">敏感主题的门控反应曲线，每个 Claude 版本表现略有差异。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">身份验证</td><td class="px-3 py-2 text-body">8 种策略让模型透露身份；易被系统提示伪造，仅作辅助证据。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">知识边界</td><td class="px-3 py-2 text-body">用不同时点的事件知识探测模型的训练数据截止日期。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">数学奥赛</td><td class="px-3 py-2 text-body">5 道 AIME 题 + 1 道经典计数题，整数答案自动判分。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">代码补全</td><td class="px-3 py-2 text-body">5 道 HumanEval 边缘任务，subprocess 沙箱直接跑测试用例。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">指令遵循</td><td class="px-3 py-2 text-body">6 道带强约束的写作任务，Python verifier 校验每条约束。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">代码编程</td><td class="px-3 py-2 text-body">单次生成 Boids / Warp 等可视化 HTML，测一次性创意编程能力。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">延迟分析</td><td class="px-3 py-2 text-body">非对称评分——比官方直连更快才可疑（小模型推理速度更快）。</td></tr>
+            <tr><td class="px-3 py-2 text-ink font-medium whitespace-nowrap align-top">响应元数据</td><td class="px-3 py-2 text-body">检查 response.model 字段与可疑 HTTP 头，最弱信号但零成本。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Capability Ruler (4-tier, public-model-anchored) -->
+  <section class="mb-20 fade-in">
+    <h2 class="serif section-title mb-8 text-ink">能力刻度尺（4 档）</h2>
+    <div class="bg-surface rounded-2xl border border-edge p-6 card">
+      <p class="text-body text-sm leading-relaxed mb-4">
+        当报告含 6 维能力探针数据时，主结论换成<span class="text-ink font-medium">能力刻度尺</span>：横轴是
+        6 个能力类别准确率的等权均值（与公开 leaderboard 相同口径），把测试端点直接放到由公开模型锚定的能力档位上。
+      </p>
+      <p class="text-body text-sm leading-relaxed mb-4">
+        阈值取相邻锚点之间的中点，使
+        <span class="font-mono text-ink">GPT-5.5</span>、<span class="font-mono text-ink">Opus 4.7</span>、<span class="font-mono text-ink">Sonnet 4.6</span>、<span class="font-mono text-ink">Haiku 4.5</span>
+        等公开模型稳定落入对应档位。
+      </p>
+    </div>
+
+    <div class="mt-6 bg-surface rounded-2xl border border-edge overflow-x-auto">
+      <table class="w-full text-sm min-w-[520px]">
+        <thead><tr class="border-b border-edge text-faded"><th class="px-5 py-3 text-left">档位</th><th class="px-5 py-3 text-left">阈值</th><th class="px-5 py-3 text-left">公开模型锚点</th></tr></thead>
+        <tbody class="divide-y divide-border/50">
+          <tr><td class="px-5 py-3 text-accent"><span class="font-medium">旗舰</span><span class="font-mono text-[10px] text-faded ml-2">TIER_FLAG</span></td><td class="px-5 py-3 text-body font-mono">&ge; 0.795</td><td class="px-5 py-3 text-body">GPT-5.5 (0.85) · GPT-5.4 (0.82) · Opus 4.7 (0.80)</td></tr>
+          <tr><td class="px-5 py-3 text-accent"><span class="font-medium">主流</span><span class="font-mono text-[10px] text-faded ml-2">TIER_MAIN</span></td><td class="px-5 py-3 text-body font-mono">&ge; 0.740</td><td class="px-5 py-3 text-body">Opus 4.6 (0.79) · Sonnet 4.6 (0.78) · DeepSeek V4 Pro (0.77)</td></tr>
+          <tr><td class="px-5 py-3 text-body"><span class="font-medium">基础</span><span class="font-mono text-[10px] text-faded ml-2">TIER_BASE</span></td><td class="px-5 py-3 text-body font-mono">&ge; 0.650</td><td class="px-5 py-3 text-body">Sonnet 4.5 (0.71) · MiniMax M2.7 (0.66)</td></tr>
+          <tr><td class="px-5 py-3 text-faded"><span class="font-medium">入门</span><span class="font-mono text-[10px] text-faded ml-2">TIER_ENTRY</span></td><td class="px-5 py-3 text-body font-mono">&lt; 0.650</td><td class="px-5 py-3 text-body">Haiku 4.5 (0.65) 及更轻量模型</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-4 text-xs text-faded leading-relaxed">
+      锚点分数取自官网直连 API 评测快照，定期重测更新。使用各模型最高 thinking effort 变体；与刻度尺横轴口径一致。
+    </p>
+  </section>
+
+  <!-- 6-tier Bayesian posterior over Claude version baselines -->
+  <section class="mb-20 fade-in">
+    <h2 class="serif section-title mb-8 text-ink">能力档位后验</h2>
+    <div class="bg-surface rounded-2xl border border-edge p-6 card mb-4">
+      <p class="text-body text-sm leading-relaxed mb-4">
+        <span class="text-ink font-medium">动机</span>：行为指纹（拒答模式、obfuscation 反应、内容门控等）容易被代理 mock 出来 — 一个完全非 Claude 的模型只要不拒答任何敏感内容，就会被错配到
+        <span class="font-mono">claude-haiku-4-5</span>。新的能力维度判别器走相反的路：用公开可验证的能力题集直接测被测模型的能力档位，再做 Bayesian 后验。
+      </p>
+      <div class="space-y-3 text-sm text-body">
+        <p><span class="text-ink font-medium">题源</span>：6 个公开能力类别（数学 / 推理 / 语言 / 指令遵循 / 数据分析 / 代码），月度轮换以抗污染；代码维度依赖 Docker 沙箱跑测试用例。</p>
+        <p><span class="text-ink font-medium">采样</span>：默认每类 10 题，seed 随机生成 + 报告里存 question_id 列表，可重放、不可预先缓存。</p>
+        <p><span class="text-ink font-medium">评分</span>：使用确定性评分机制（math 用 sympy 解析、reasoning 用语义匹配、IF 用 pure-python verifier、coding 用 Docker 沙箱跑测试用例）。每题输出 5 态结果之一：correct / wrong / refused / parse_error / runtime_error。</p>
+        <p><span class="text-ink font-medium">后验</span>：每个类别视作独立归一化计算，6 档（Opus 4.7 / Opus 4.6 / Sonnet 4.6 / Sonnet 4.5 / Haiku 4.5 / 低于 Haiku）。计算成绩分布与自我声明的匹配程度。</p>
+      </div>
+    </div>
+    <div class="bg-surface rounded-2xl border border-edge p-6 card">
+      <h3 class="text-ink font-medium mb-3">已知校准问题</h3>
+      <ul class="space-y-2 text-sm text-body">
+        <li class="flex gap-2"><span class="text-faded">&bull;</span>公开模型基线按 thinking-on 校准；我们 send_message 不传 thinking 参数 → 绝对分被 1-2 档下移，但相对排序仍可比较。</li>
+        <li class="flex gap-2"><span class="text-faded">&bull;</span>免费快速测试 60 题 σ ≈ 16pt，单次评测结果可能存在波动；付费完整测试（数百题）置信度更高。</li>
+        <li class="flex gap-2"><span class="text-faded">&bull;</span>代码维度需 host 安装 Docker；未安装时维度自动剔除，confidence=0.1。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Adversarial defense -->
+  <section class="mb-20 fade-in">
+    <h2 class="serif section-title mb-8 text-ink">对抗与防御</h2>
+    <p class="text-sm text-body leading-relaxed mb-6">
+      本工具一旦被中转站知晓，其经营者就可能采取针对性的对抗手段以掩盖降级行为。我们持续投入资源识别并削弱这些手段，让评测结果对最终用户尽可能真实。
+    </p>
+
+    <div class="space-y-4">
+      <div class="bg-surface rounded-2xl border border-edge p-5 card">
+        <h3 class="text-ink font-medium mb-3">中转站可能的做法</h3>
+        <ul class="space-y-2 text-sm text-body">
+          <li class="flex gap-2"><span class="text-faded">&bull;</span>抓取并缓存测试题库，对已知题目预生成正确答案以骗过判分。</li>
+          <li class="flex gap-2"><span class="text-faded">&bull;</span>记录评测方服务器的固定出口 IP，仅对该 IP 提供完整旗舰模型，对普通用户继续走降级路径。</li>
+          <li class="flex gap-2"><span class="text-faded">&bull;</span>识别请求里的特征（固定 prompt 模板、固定 user-agent、固定批量节奏）后切换到"演戏模式"。</li>
+        </ul>
+      </div>
+      <div class="bg-surface rounded-2xl border border-edge p-5 card">
+        <h3 class="text-ink font-medium mb-3">我们的针对性措施</h3>
+        <ul class="space-y-2 text-sm text-body">
+          <li class="flex gap-2"><span class="text-faded">&bull;</span><span><strong class="text-ink">题库随机抽取</strong>：每次测试用随机种子从大题集里抽题，单题被重复命中的概率极低。</span></li>
+          <li class="flex gap-2"><span class="text-faded">&bull;</span><span><strong class="text-ink">题库定期更新</strong>：以月为周期轮换题源，已外泄或被批量抓取的题目会及时退出在用题集。</span></li>
+          <li class="flex gap-2"><span class="text-faded">&bull;</span><span><strong class="text-ink">随机 IP 保护</strong>：测试请求经住宅代理池随机出口，让中转方看到的来源 IP 与普通终端用户难以区分。</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="mt-6 text-sm text-body leading-relaxed">
+      我们无意宣称防御是完美的——这是一场长期博弈。但<span class="text-ink font-medium">尽最大可能为用户提供有效、可信的评测数据</span>，是慧眼鉴真的价值所在。
+    </p>
+  </section>
+
+  <!-- Limitations -->
+  <section class="mb-20 fade-in">
+    <h2 class="serif section-title mb-8 text-ink">已知局限性</h2>
+    <div class="bg-surface rounded-2xl border border-edge p-6 card">
+      <ul class="space-y-3 text-sm text-body">
+        <li class="flex gap-2"><span class="text-faded">&bull;</span><span><strong class="text-ink">小样本方差</strong>：免费版每类抽 10 题，单次测试 σ 较大，建议多次取平均判断；付费版将开放完整题库（每类数百题），单次测试即可锁定能力档位。</span></li>
+        <li class="flex gap-2"><span class="text-faded">&bull;</span><span><strong class="text-ink">题库污染风险</strong>：若被测模型在训练时已经见过题集中的部分题目，分数会虚高。我们以月为周期轮换题源、用随机种子抽样以降低命中概率，但完全杜绝训练污染并不现实。</span></li>
+        <li class="flex gap-2"><span class="text-faded">&bull;</span><span><strong class="text-ink">基线对照差异</strong>：公开模型的基线分数取自其官方"开启思考"配置；本工具为兼容更广的代理协议默认采用无 thinking 模式，被测端点的绝对分通常较公开榜偏低 1-2 档，相邻档位之间的相对排序仍可比较。</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="text-center fade-in">
+    <a href="{{ tool_cta_url }}" class="inline-block bg-accent hover:bg-accent-hover text-white font-medium px-6 py-3 rounded-xl transition">
+      去 SeerBench，立即验证你的 API 端点 &rarr;
+    </a>
+  </div>
+
+</div>
+{% endblock %}

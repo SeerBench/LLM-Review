@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN" :data-theme="theme" x-data="appState()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404</title>
+  <meta name="description" content="慧眼鉴真用 6 项能力探针扫描你的 Claude API 端点，对照公开 leaderboard 给出可分享的能力档位评估。">
+
+  <!-- Fonts: bunny.net (Google Fonts drop-in, mainland-China accessible). -->
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+  <link href="https://fonts.bunny.net/css?family=fraunces:400,500,600,700|geist:300,400,500,600|jetbrains-mono:400,500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN. Token names mirror DESIGN.md. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          colors: {
+            base:    'var(--bg-base)',
+            surface: 'var(--bg-surface)',
+            muted:   'var(--bg-muted)',
+            ink:     'var(--text-primary)',
+            body:    'var(--text-secondary)',
+            faded:   'var(--text-muted)',
+            accent:  { DEFAULT: 'var(--accent)', hover: 'var(--accent-hover)', soft: 'var(--accent-soft)' },
+            edge:    { DEFAULT: 'var(--border-subtle)', strong: 'var(--border-strong)' },
+            ok:      { DEFAULT: 'var(--success)', soft: 'var(--success-soft)' },
+            warn:    { DEFAULT: 'var(--warning)', soft: 'var(--warning-soft)' },
+            bad:     { DEFAULT: 'var(--danger)',  soft: 'var(--danger-soft)' },
+          },
+          fontFamily: {
+            serif: ['Fraunces', '"Songti SC"', '"STSong"', '"Source Han Serif SC"', '"Noto Serif SC"', 'ui-serif', 'Georgia', 'serif'],
+            sans:  ['Geist', '"PingFang SC"', '"Microsoft YaHei"', '"Source Han Sans SC"', '"Noto Sans SC"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono:  ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          borderRadius: { sm: '4px', md: '8px', lg: '12px', xl: '16px' },
+        },
+      },
+    }
+  </script>
+
+  <!-- Alpine.js (only used for theme toggle on this static site) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    /* ── Design tokens (DESIGN.md is source of truth) ────────── */
+    :root, [data-theme="light"] {
+      --bg-base:        #FAF9F5;
+      --bg-surface:     #FFFFFF;
+      --bg-muted:       #F0EBE0;
+      --text-primary:   #191817;
+      --text-secondary: #4A4642;
+      --text-muted:     #87827A;
+      --accent:         #CC785C;
+      --accent-hover:   #B5663E;
+      --accent-soft:    #F5E6DE;
+      --border-subtle:  #E5E1D8;
+      --border-strong:  #C9C3B6;
+      --success:        #6B7F4A;
+      --success-soft:   #E8ECD9;
+      --warning:        #C9994A;
+      --warning-soft:   #F5EAD0;
+      --danger:         #B5482D;
+      --danger-soft:    #F5DDD0;
+
+      --duration-fast:  100ms;
+      --duration-base:  200ms;
+      --duration-slow:  300ms;
+      --ease-standard:  cubic-bezier(0.2, 0, 0, 1);
+    }
+    [x-cloak] { display: none !important; }
+
+    [data-theme="dark"] {
+      --bg-base:        #262624;
+      --bg-surface:     #30302D;
+      --bg-muted:       #3A3936;
+      --text-primary:   #F5F1EB;
+      --text-secondary: #BDB9B0;
+      --text-muted:     #87827A;
+      --accent:         #D97757;
+      --accent-hover:   #E08A6D;
+      --accent-soft:    #3D2E27;
+      --border-subtle:  #3A3936;
+      --border-strong:  #4A4642;
+      --success:        #8FA36A;
+      --success-soft:   #2F3827;
+      --warning:        #D9B36A;
+      --warning-soft:   #3A3320;
+      --danger:         #D06548;
+      --danger-soft:    #3D2721;
+    }
+
+    html, body {
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: Geist, "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      transition: background var(--duration-slow) var(--ease-standard), color var(--duration-slow) var(--ease-standard);
+    }
+
+    h1, h2, h3, h4, .serif {
+      font-family: Fraunces, "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", ui-serif, Georgia, serif;
+      font-optical-sizing: auto;
+      letter-spacing: -0.01em;
+      font-weight: 500;
+    }
+
+    .hero-display {
+      font-size: clamp(48px, 8vw, 96px);
+      line-height: 1.02;
+      letter-spacing: -0.025em;
+      font-weight: 500;
+    }
+    @media (max-width: 640px) {
+      .hero-display { line-height: 1.06; letter-spacing: -0.02em; }
+    }
+
+    .section-title { font-size: 36px; line-height: 1.2; font-weight: 500; letter-spacing: -0.015em; }
+    @media (max-width: 640px) {
+      .section-title { font-size: 28px; line-height: 1.25; }
+    }
+
+    .hero-sub {
+      font-size: 20px; line-height: 1.55;
+      color: var(--text-secondary);
+      max-width: 640px;
+      font-weight: 400;
+    }
+    @media (max-width: 640px) {
+      .hero-sub { font-size: 17px; line-height: 1.6; }
+    }
+
+    .section-lead {
+      font-size: 15px; line-height: 1.6; color: var(--text-secondary);
+      max-width: 560px; margin-left: auto; margin-right: auto;
+    }
+
+    .mono, code, pre, [class*="font-mono"] {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .nav-glass {
+      background: color-mix(in srgb, var(--bg-base) 92%, transparent);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      transition: border-color var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-standard);
+    }
+    .card:hover { border-color: var(--border-strong); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 6px;
+      font-size: 14px; font-weight: 500;
+      border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+      transition: all var(--duration-base) var(--ease-standard);
+    }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-1px); }
+    .btn-secondary { background: var(--bg-surface); color: var(--text-primary); border-color: var(--border-strong); }
+    .btn-secondary:hover { border-color: var(--text-primary); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); }
+    .btn-ghost:hover { background: var(--bg-muted); color: var(--text-primary); }
+
+    /* Form input look — used by index.html for the static (display-only) form preview. */
+    .input {
+      width: 100%; background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px; padding: 10px 14px;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 14px; color: var(--text-primary); outline: none;
+      transition: border-color var(--duration-base), box-shadow var(--duration-base);
+    }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 4px;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+    }
+    .badge-ok    { background: var(--success-soft); color: var(--success); }
+    .badge-warn  { background: var(--warning-soft); color: var(--warning); }
+    .badge-bad   { background: var(--danger-soft);  color: var(--danger); }
+    .badge-mute  { background: var(--bg-muted); color: var(--text-secondary); }
+
+    .eyebrow {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      font-size: 12px; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .hero-lead {
+      font-family: Geist, "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+      font-size: 14px; letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .section-head { margin-bottom: 48px; text-align: center; }
+    .section-head .eyebrow { margin-bottom: 12px; }
+    .section-head .section-title { margin-bottom: 12px; }
+
+    .fade-in { animation: fadeIn var(--duration-slow) var(--ease-standard); }
+    .fade-in-delay-1 { animation: fadeIn var(--duration-slow) var(--ease-standard) 100ms both; }
+    .fade-in-delay-2 { animation: fadeIn var(--duration-slow) var(--ease-standard) 200ms both; }
+    .fade-in-delay-3 { animation: fadeIn var(--duration-slow) var(--ease-standard) 300ms both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .score-bar { transition: width 1s var(--ease-standard); }
+
+    /* Blinking cursor (used on hero headline). */
+    .cursor-blink {
+      display: inline-block; width: 0.5ch; height: 0.85em;
+      background: var(--accent); vertical-align: -0.12em;
+      margin-left: 0.06em; animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    a { transition: color var(--duration-base) var(--ease-standard); }
+
+    .link { color: var(--accent); }
+    .link:hover { color: var(--accent-hover); }
+  </style>
+  
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Navigation -->
+  <nav class="nav-glass fixed top-0 w-full z-50" style="border-bottom: 1px solid var(--border-subtle);">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-4 sm:gap-8 min-w-0">
+        <a href="index.html" class="flex items-center gap-2 group min-w-0">
+          <span class="inline-grid place-items-center w-6 h-6 rounded-sm text-white serif italic font-semibold text-[14px] shrink-0" style="background: var(--accent);">S</span>
+          <span class="serif text-[16px] sm:text-[18px] font-medium whitespace-nowrap" style="color: var(--text-primary); letter-spacing: -0.01em;">慧眼鉴真<em class="italic hidden sm:inline" style="color: var(--text-muted); font-weight: 400;"> · SeerBench</em></span>
+        </a>
+        <div class="hidden sm:flex items-center gap-6 text-sm" style="color: var(--text-secondary);">
+          <a href="index.html" class="hover:text-[var(--text-primary)]">首页</a>
+          <a href="methodology.html" class="hover:text-[var(--text-primary)]">方法论</a>
+          <a href="values.html" class="hover:text-[var(--text-primary)]">价值观</a>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 sm:gap-3 text-sm shrink-0">
+        <a href="https://seerbench.com" class="btn btn-primary !py-1.5 !px-2.5 sm:!px-4">
+          去 SeerBench
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5" aria-hidden="true">
+            <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+          </svg>
+        </a>
+        <button @click="toggleTheme()"
+                class="btn btn-ghost !p-1.5 inline-flex items-center justify-center"
+                :title="theme === 'light' ? '切换到深色' : '切换到浅色'"
+                aria-label="切换主题">
+          <svg x-show="theme === 'light'" x-cloak xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4" aria-hidden="true">
+            <path fill-rule="evenodd" d="M7.455 2.004a.75.75 0 01.26.77 7 7 0 009.958 7.967.75.75 0 011.067.853A8.5 8.5 0 116.647 1.921a.75.75 0 01.808.083z" clip-rule="evenodd" />
+          </svg>
+          <svg x-show="theme === 'dark'" x-cloak xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4" aria-hidden="true">
+            <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.404a.75.75 0 10-1.06-1.06l-1.061 1.06a.75.75 0 001.06 1.06l1.06-1.06zM6.464 14.596a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 001.06 1.06l1.06-1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zM5 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 015 10zM14.596 15.657a.75.75 0 001.06-1.06l-1.06-1.061a.75.75 0 10-1.06 1.06l1.06 1.06zM5.404 6.464a.75.75 0 001.06-1.06l-1.06-1.06a.75.75 0 10-1.061 1.06l1.06 1.06z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="flex-1 pt-14">
+    
+<div class="max-w-lg mx-auto px-6 py-20 text-center fade-in">
+  <h1 class="text-6xl font-bold font-mono text-faded">404</h1>
+  <p class="mt-4 text-body">页面不存在</p>
+  <a href="index.html" class="inline-block mt-6 text-accent hover:text-accent-hover transition text-sm font-medium">返回首页 &rarr;</a>
+</div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-10 mt-24" style="border-top: 1px solid var(--border-subtle); background: var(--bg-muted);">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+      <div class="flex items-center gap-6 flex-wrap justify-center sm:justify-start">
+        <span class="serif text-[15px] font-medium" style="color: var(--text-primary);">慧眼鉴真 · SeerBench</span>
+        <a href="methodology.html" class="hover:text-[var(--text-primary)]" style="color: var(--text-secondary);">方法论</a>
+        <a href="values.html" class="hover:text-[var(--text-primary)]" style="color: var(--text-secondary);">价值观</a>
+        <a href="https://github.com/SeerBench/LLM-Review" target="_blank" rel="noopener" class="hover:text-[var(--text-primary)]" style="color: var(--text-secondary);">GitHub</a>
+      </div>
+      <div class="text-xs" style="color: var(--text-muted);">本工具不隶属于 Anthropic</div>
+    </div>
+  </footer>
+
+  <script>
+    function appState() {
+      return {
+        theme: 'light',
+        init() {
+          const saved = localStorage.getItem('seer-theme');
+          if (saved === 'light' || saved === 'dark') {
+            this.theme = saved;
+          } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            this.theme = 'dark';
+          }
+        },
+        toggleTheme() {
+          this.theme = this.theme === 'light' ? 'dark' : 'light';
+          localStorage.setItem('seer-theme', this.theme);
+        },
+      }
+    }
+  </script>
+  
+</body>
+</html>
